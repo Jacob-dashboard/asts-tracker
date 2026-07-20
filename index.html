@@ -558,7 +558,7 @@ function buildChart() {
   const svg = $("chart");
   // never narrower than 720px — on phones the card scrolls sideways instead of squeezing labels
   const W = Math.max(svg.parentElement.clientWidth || 1100, 720), H = 330;
-  const M = { l: 46, r: 14, t: 34, b: 86 };
+  const M = { l: 46, r: 14, t: 44, b: 86 };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("width", W);
   svg.setAttribute("height", H);
@@ -628,7 +628,7 @@ function buildChart() {
             fill="${L.type==="failed" ? "var(--critical)" : "var(--ink-3)"}"
             transform="rotate(-38 ${x+3} ${H-M.b+14})">${fmt(L.date)} · ${tag}</text>`;
     if (cum >= TARGET && L.count && L.type!=="failed" && !g.includes("goal-flag")) {
-      g += `<text id="goal-flag" x="${W-M.r}" y="${M.t-8}" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--good)">${W<700 ? "↓ 45 ✓" : "↓ 45 ✓ coverage begins"}</text>`;
+      g += `<text id="goal-flag" x="${W-M.r}" y="16" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--good)">↓ 45 ✓ coverage begins</text>`;
     }
   });
 
