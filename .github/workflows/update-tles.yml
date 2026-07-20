@@ -1,0 +1,24 @@
+name: Update TLEs
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # daily at 06:00 UTC
+  workflow_dispatch:        # manual run button
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch fresh TLEs from CelesTrak
+        run: ./update-tles.sh
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tles.js
+          git diff --cached --quiet || { git commit -m "Update TLEs $(date -u +%F)"; git push; }

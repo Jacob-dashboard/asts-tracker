@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTS Constellation Tracker — AST SpaceMobile</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface-1: #1a1a19;   /* chart surface */
+    --page:      #0d0d0d;
+    --ink-1:     #ffffff;
+    --ink-2:     #c3c2b7;
+    --ink-3:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --border:    rgba(255,255,255,0.10);
+    --spacex:    #3987e5;   /* categorical slot 1 (blue, dark step)  */
+    --blue-origin:#008300;  /* categorical slot 2 (green)            */
+    --isro:      #d55181;   /* categorical slot 3 (magenta, dark)    */
+    --good:      #0ca30c;
+    --warning:   #fab219;
+    --critical:  #d03b3b;
+    --ocean:     #10151c;
+    --land:      #232a26;
+    --land-line: #3a423c;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page:      #f9f9f7;
+    --ink-1:     #0b0b0b;
+    --ink-2:     #52514e;
+    --ink-3:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+    --spacex:    #2a78d6;
+    --blue-origin:#008300;
+    --isro:      #e87ba4;
+    --ocean:     #e8eef4;
+    --land:      #d7ddd4;
+    --land-line: #b6c0b4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 20px; padding: 8px 0 4px; }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  header h1 span { color: var(--spacex); }
+  .clock { font-variant-numeric: tabular-nums; color: var(--ink-2); font-size: 14px; }
+  .tle-age { font-size: 12.5px; color: var(--ink-3); }
+  .tle-age.stale { color: var(--warning); }
+  .spacer { flex: 1; }
+  button.theme {
+    background: none; border: 1px solid var(--border); color: var(--ink-2);
+    border-radius: 8px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  }
+  button.theme:hover { color: var(--ink-1); }
+
+  /* ---- stat tiles ---- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0 26px; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px 12px;
+  }
+  .tile .k { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .tile .v { font-size: 30px; font-weight: 700; margin-top: 2px; }
+  .tile .s { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+  .meter { height: 6px; background: var(--grid); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .meter > div { height: 100%; background: var(--spacex); border-radius: 3px; }
+
+  h2 { font-size: 17px; font-weight: 650; margin: 34px 0 4px; }
+  .sub { color: var(--ink-3); font-size: 13.5px; margin-bottom: 14px; }
+
+  /* ---- map ---- */
+  .map-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+  .map-flex { display: flex; gap: 14px; align-items: stretch; }
+  .map-main { flex: 1 1 auto; min-width: 0; }
+  #map { width: 100%; display: block; border-radius: 8px; cursor: pointer; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 4px 2px; font-size: 12.5px; color: var(--ink-2); }
+  .legend b { color: var(--ink-1); font-weight: 600; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; }
+  .dot.hollow { background: none !important; border: 2px solid; width: 7px; height: 7px; }
+  .sat-panel {
+    flex: 0 0 240px; border-left: 1px solid var(--border); padding-left: 14px;
+    font-size: 13px; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px;
+  }
+  .sat-panel h3 { color: var(--ink-1); font-size: 15px; margin-bottom: 2px; }
+  .sat-panel .num { font-variant-numeric: tabular-nums; color: var(--ink-1); }
+  .sat-panel .hint { color: var(--ink-3); font-size: 12px; margin-top: auto; padding-top: 10px; }
+  @media (max-width: 800px) { .map-flex { flex-direction: column; } .sat-panel { border-left: none; padding-left: 0; flex-basis: auto; } }
+
+  /* ---- badges ---- */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2.5px 10px; white-space: nowrap; }
+  .badge.unfolded { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+  .badge.checkout { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+  .badge.lost { color: var(--critical); background: color-mix(in srgb, var(--critical) 13%, transparent); }
+  .badge.proto { color: var(--ink-2); background: color-mix(in srgb, var(--ink-3) 15%, transparent); }
+  .chip { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; border-radius: 5px; padding: 1.5px 7px; }
+  .chip.b1 { color: var(--spacex); border: 1px solid var(--spacex); }
+  .chip.b2 { color: var(--blue-origin); border: 1px solid var(--blue-origin); }
+  .chip.bw { color: var(--ink-3); border: 1px solid var(--ink-3); }
+  .prov { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+  .prov i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  /* ---- fleet grid ---- */
+  .fleet { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 12px; }
+  .sat-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 15px; font-size: 13px; color: var(--ink-2);
+  }
+  .sat-card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+  .sat-card h3 { font-size: 14.5px; color: var(--ink-1); }
+  .sat-card .row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .sat-card .row span:last-child { color: var(--ink-1); font-variant-numeric: tabular-nums; text-align: right; }
+  .sat-card .st { margin-top: 8px; }
+  .sat-card .note { margin-top: 7px; font-size: 12px; color: var(--ink-3); }
+
+  /* ---- roadmap ---- */
+  .chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 8px; }
+  #chart { width: 100%; display: block; overflow: visible; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 8px 6px 10px; font-size: 12.5px; color: var(--ink-2); }
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 9px;
+    padding: 8px 11px; font-size: 12.5px; color: var(--ink-2); box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+    max-width: 260px;
+  }
+  .tooltip b { color: var(--ink-1); display: block; margin-bottom: 2px; }
+
+  .timeline { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .launch {
+    display: grid; grid-template-columns: 92px 1fr auto auto; gap: 6px 14px; align-items: center;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 11px; padding: 10px 15px;
+    font-size: 13.5px;
+  }
+  .launch.projected { border-style: dashed; opacity: 0.85; }
+  .launch .date { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .launch .what b { color: var(--ink-1); font-weight: 600; }
+  .launch .what .n { color: var(--ink-3); font-size: 12px; }
+  .launch .cum { font-variant-numeric: tabular-nums; color: var(--ink-2); font-size: 12.5px; text-align: right; }
+  .launch .cum b { color: var(--ink-1); font-size: 15px; }
+  .lb { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; border-radius: 5px; padding: 2px 8px; text-transform: uppercase; }
+  .lb.complete { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+  .lb.failed { color: var(--critical); background: color-mix(in srgb, var(--critical) 13%, transparent); }
+  .lb.booked { color: var(--spacex); background: color-mix(in srgb, var(--spacex) 14%, transparent); }
+  .lb.projected { color: var(--ink-3); background: color-mix(in srgb, var(--ink-3) 15%, transparent); }
+  .divider-row { display: flex; align-items: center; gap: 10px; color: var(--ink-3); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; margin: 6px 0; }
+  .divider-row::before, .divider-row::after { content: ""; flex: 1; border-top: 1px dashed var(--baseline); }
+  @media (max-width: 640px) { .launch { grid-template-columns: 80px 1fr; } .launch .cum { text-align: left; } }
+
+  /* ---- providers ---- */
+  .provs { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .prov-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 15px 17px; font-size: 13px; color: var(--ink-2); border-top: 3px solid var(--pc); }
+  .prov-card h3 { font-size: 15px; color: var(--ink-1); display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .prov-card .row { display: flex; justify-content: space-between; padding: 2.5px 0; }
+  .prov-card .row span:last-child { color: var(--ink-1); text-align: right; }
+  .pstat { font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px; }
+  .pstat.active { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+  .pstat.grounded { color: var(--critical); background: color-mix(in srgb, var(--critical) 13%, transparent); }
+  .pstat.flown { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+
+  footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--ink-3); font-size: 12px; }
+  footer code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 11.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🛰️ ASTS Constellation Tracker <span>· AST SpaceMobile</span></h1>
+    <div class="clock" id="clock">—</div>
+    <div class="tle-age" id="tleAge"></div>
+    <div class="spacer"></div>
+    <button class="theme" id="themeBtn">☀️ Light</button>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>Live Orbit Map</h2>
+  <div class="sub">Positions propagated from CelesTrak orbital elements (Kepler + J2). Click a satellite for details and its ground track. Shaded region = night side.</div>
+  <div class="map-card">
+    <div class="map-flex">
+      <div class="map-main">
+        <canvas id="map"></canvas>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--spacex)"></i><b>Block 1</b> BlueBird (BB1)</span>
+          <span><i class="dot" style="background:var(--blue-origin)"></i><b>Block 2</b> BlueBird (BB2)</span>
+          <span><i class="dot" style="background:var(--ink-3)"></i><b>BlueWalker 3</b> prototype</span>
+          <span><i class="dot" style="background:var(--ink-2)"></i>Filled = unfolded</span>
+          <span><i class="dot hollow" style="border-color:var(--ink-2)"></i>Hollow = deployed, unfolding pending</span>
+        </div>
+      </div>
+      <div class="sat-panel" id="satPanel"></div>
+    </div>
+  </div>
+
+  <h2>Fleet Status</h2>
+  <div class="sub">Every AST SpaceMobile satellite launched to date — Block 1 (BB1, 693 ft² arrays) and Block 2 (BB2, ~2,400 ft² arrays, the largest commercial arrays ever flown).</div>
+  <div class="fleet" id="fleet"></div>
+
+  <h2>Launch Roadmap → 45 Satellites</h2>
+  <div class="sub">One bar per launch: color = provider, height = BB2 satellites carried, <b>Σ = running total in orbit</b>. ~45 satellites is where continuous commercial coverage can begin. Launches right of the divider are a <b>hypothetical</b> schedule (Falcon 9 cadence + New Glenn hopefully back online in 1H 2027) finishing by Q3 2027.</div>
+  <div class="chart-card">
+    <svg id="chart"></svg>
+    <div class="chart-legend">
+      <span><i class="dot" style="background:var(--spacex)"></i>SpaceX Falcon 9 <b style="color:var(--ink-3);font-weight:400">(3 × BB2 per launch)</b></span>
+      <span><i class="dot" style="background:var(--blue-origin)"></i>Blue Origin New Glenn <b style="color:var(--ink-3);font-weight:400">(up to 8 × BB2 · grounded, hoped back 1H ’27)</b></span>
+      <span><i class="dot" style="background:var(--isro)"></i>ISRO LVM3 <b style="color:var(--ink-3);font-weight:400">(flew BB6 — no future launches assumed)</b></span>
+      <span style="color:var(--critical)">✕ launch failure</span>
+      <span style="color:var(--ink-3)">solid bar: flown/booked · outlined bar: hypothetical</span>
+    </div>
+  </div>
+  <div class="timeline" id="timeline"></div>
+
+  <h2>Launch Providers</h2>
+  <div class="provs" id="provs"></div>
+
+  <footer>
+    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through July 20, 2026 — BlueBirds 8–10 arrays fully unfolded July 20, 2026; BlueBirds 11–13 booked on Falcon 9 for the first half of August 2026; commercial direct-to-device service deferred to early 2027.</p>
+    <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027, and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
+  </footer>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script src="land.js"></script>
+<script src="tles.js"></script>
+<script>
+"use strict";
+
+/* ================= DATA ================= */
+
+const PROVIDERS = {
+  spacex: { name: "SpaceX", vehicle: "Falcon 9",  cssVar: "--spacex",      capacity: "3 × Block 2 BlueBirds", status: "active",
+            detail: "Workhorse of the manifest. Flew Block 1 (5 sats, one launch) and now Block 2 in batches of three." },
+  blue:   { name: "Blue Origin", vehicle: "New Glenn", cssVar: "--blue-origin", capacity: "Up to 8 × Block 2 BlueBirds", status: "grounded",
+            detail: "Contracted for the bulk of the 45-sat build-out. Grounded after a June 2026 upper-stage ground-test anomaly; BB7 was lost on NG-3 in April 2026 (stage-2 underperformance). Under repair — hopefully back online in 1H 2027; the roadmap assumes nothing sooner." },
+  isro:   { name: "ISRO", vehicle: "LVM3 (GSLV Mk III)", cssVar: "--isro", capacity: "1 × Block 2 BlueBird", status: "flown",
+            detail: "Launched BlueBird 6 — the first Block 2 — on LVM3-M6 in December 2025. No further AST missions announced, so the roadmap assumes none. AST is exploring ways to expand launch capacity beyond the current providers." },
+};
+
+// status: unfolded | checkout | lost   (checkout = deployed in orbit, array unfold pending)
+const FLEET = [
+  { id:"BW3",  name:"BlueWalker 3", block:"proto", cat:"BLUEWALKER-3",    launched:"2022-09-10", provider:"spacex", vehicle:"Falcon 9",
+    status:"unfolded", statusNote:"Unfolded Nov 2022", array:693,  note:"Prototype / test satellite — not counted toward the commercial 45." },
+  { id:"BB1",  name:"BlueBird 1",  block:"b1", cat:"SPACEMOBILE-001", launched:"2024-09-12", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Oct 2024", array:693 },
+  { id:"BB2",  name:"BlueBird 2",  block:"b1", cat:"SPACEMOBILE-002", launched:"2024-09-12", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Oct 2024", array:693 },
+  { id:"BB3",  name:"BlueBird 3",  block:"b1", cat:"SPACEMOBILE-003", launched:"2024-09-12", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Oct 2024", array:693 },
+  { id:"BB4",  name:"BlueBird 4",  block:"b1", cat:"SPACEMOBILE-004", launched:"2024-09-12", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Nov 2024", array:693 },
+  { id:"BB5",  name:"BlueBird 5",  block:"b1", cat:"SPACEMOBILE-005", launched:"2024-09-12", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Nov 2024", array:693 },
+  { id:"BB6",  name:"BlueBird 6",  block:"b2", cat:"SPACEMOBILE-006", launched:"2025-12-23", provider:"isro",   vehicle:"LVM3-M6",  status:"unfolded", statusNote:"Unfolded Feb 10, 2026", array:2400,
+    note:"First Block 2 — largest commercial comms array ever deployed in LEO." },
+  { id:"BB7",  name:"BlueBird 7",  block:"b2", cat:null,              launched:"2026-04-19", provider:"blue",   vehicle:"New Glenn NG-3", status:"lost", statusNote:"Lost Apr 2026", array:2400,
+    note:"Stage-2 underperformance left it in an unrecoverable orbit; de-orbited." },
+  { id:"BB8",  name:"BlueBird 8",  block:"b2", cat:"SPACEMOBILE-008", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 2026", array:2400 },
+  { id:"BB9",  name:"BlueBird 9",  block:"b2", cat:"SPACEMOBILE-009", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Jul 20, 2026", array:2400 },
+  { id:"BB10", name:"BlueBird 10", block:"b2", cat:"SPACEMOBILE-010", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 15, 2026", array:2400 },
+];
+
+// type: complete | failed | booked | projected     count = operational sats added
+const LAUNCHES = [
+  { date:"2022-09-10", label:"BlueWalker 3 (prototype)", provider:"spacex", vehicle:"Falcon 9",       count:0, type:"complete", note:"Test sat — proves the unfolding-array design" },
+  { date:"2024-09-12", label:"BlueBirds 1–5 · Block 1",  provider:"spacex", vehicle:"Falcon 9",       count:5, type:"complete", note:"All five arrays unfolded fall 2024" },
+  { date:"2025-12-23", label:"BlueBird 6 · first Block 2", provider:"isro", vehicle:"LVM3-M6",        count:1, type:"complete", note:"Unfolded Feb 10, 2026 — record 2,400 ft² array" },
+  { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
+  { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
+  { date:"2026-08-08", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"booked",   note:"Booked — targeting first half of August 2026" },
+  { date:"2026-10-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical — Falcon 9 cadence continues" },
+  { date:"2026-11-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2026-12-18", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-01-25", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-03-05", label:"BlueBirds 26–28",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-04-20", label:"BlueBirds 29–36",          provider:"blue",   vehicle:"New Glenn",      count:8, type:"projected", note:"Hypothetical — New Glenn return-to-flight (hoped 1H 2027), first 8-pack" },
+  { date:"2027-05-25", label:"BlueBirds 37–39",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-07-15", label:"BlueBirds 40–46",          provider:"blue",   vehicle:"New Glenn",      count:7, type:"projected", note:"Hypothetical — partial 8-slot manifest tops off the constellation: 45th operational satellite ✓ (Q3 2027)" },
+];
+const TARGET = 45;
+const NOW = () => new Date();
+
+/* ================= TLE PROPAGATION (Kepler + J2 secular) ================= */
+
+const MU = 398600.4418, RE = 6378.137, J2 = 1.08262668e-3, D2R = Math.PI/180;
+
+function parseTLE(l1, l2) {
+  const yy = +l1.slice(18,20), doy = +l1.slice(20,32);
+  const year = yy < 57 ? 2000+yy : 1900+yy;
+  const epochMs = Date.UTC(year,0,1) + (doy-1)*86400e3;
+  const e = +("0."+l2.slice(26,33).trim());
+  const n = +l2.slice(52,63);                       // rev/day
+  const nRad = n*2*Math.PI/86400;                   // rad/s
+  const a = Math.cbrt(MU/(nRad*nRad));
+  return {
+    epochMs, e, a,
+    i:    +l2.slice(8,16)*D2R,
+    raan: +l2.slice(17,25)*D2R,
+    argp: +l2.slice(34,42)*D2R,
+    m0:   +l2.slice(43,51)*D2R,
+    n:    nRad,
+    ndot: +l1.slice(33,43)*2*2*Math.PI/(86400*86400), // rev/day^2 /2 in TLE → rad/s^2
+    norad:+l1.slice(2,7),
+  };
+}
+
+function propagate(t, when) {
+  const dt = (when - t.epochMs)/1000;               // s since epoch
+  const p = t.a*(1-t.e*t.e);
+  const fac = 1.5*J2*(RE/p)*(RE/p)*t.n;
+  const raan = t.raan - fac*Math.cos(t.i)*dt;
+  const argp = t.argp + fac*(2 - 2.5*Math.sin(t.i)**2)*dt;
+  let M = t.m0 + t.n*dt + 0.5*t.ndot*dt*dt;
+  M %= 2*Math.PI;
+  let E = M;
+  for (let k=0;k<8;k++) E = E - (E - t.e*Math.sin(E) - M)/(1 - t.e*Math.cos(E));
+  const nu = 2*Math.atan2(Math.sqrt(1+t.e)*Math.sin(E/2), Math.sqrt(1-t.e)*Math.cos(E/2));
+  const r = t.a*(1 - t.e*Math.cos(E));
+  const u = argp + nu;
+  // perifocal → ECI
+  const x = r*(Math.cos(raan)*Math.cos(u) - Math.sin(raan)*Math.sin(u)*Math.cos(t.i));
+  const y = r*(Math.sin(raan)*Math.cos(u) + Math.cos(raan)*Math.sin(u)*Math.cos(t.i));
+  const z = r*Math.sin(u)*Math.sin(t.i);
+  // GMST
+  const jd = when/86400e3 + 2440587.5;
+  const gmst = ((280.46061837 + 360.98564736629*(jd - 2451545)) % 360)*D2R;
+  let lon = Math.atan2(y,x) - gmst;
+  lon = ((lon + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
+  const lat = Math.atan2(z, Math.hypot(x,y));
+  const vel = Math.sqrt(MU*(2/r - 1/t.a));
+  return { lat: lat/D2R, lon: lon/D2R, alt: r-6371, vel };
+}
+
+const sats = FLEET.filter(s => s.cat && TLE_DATA.tles[s.cat])
+  .map(s => ({ ...s, tle: parseTLE(...TLE_DATA.tles[s.cat]) }));
+
+/* ================= HEADER / TILES ================= */
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const $ = id => document.getElementById(id);
+
+const opCount   = FLEET.filter(s => s.block!=="proto" && s.status!=="lost").length;
+const unfolded  = FLEET.filter(s => s.block!=="proto" && s.status==="unfolded").length;
+const checkout  = FLEET.filter(s => s.status==="checkout").length;
+const lost      = FLEET.filter(s => s.status==="lost").length;
+const nextLaunch= LAUNCHES.find(l => l.type==="booked");
+
+$("tiles").innerHTML = `
+  <div class="tile"><div class="k">In orbit (operational)</div><div class="v">${opCount}</div><div class="s">5 × Block 1 + ${opCount-5} × Block 2</div></div>
+  <div class="tile"><div class="k">Fully unfolded</div><div class="v" style="color:var(--good)">${unfolded}</div><div class="s">arrays deployed &amp; operating</div></div>
+  <div class="tile"><div class="k">Deployed · unfolding pending</div><div class="v" style="color:var(${checkout?"--warning":"--good"})">${checkout}</div><div class="s">${checkout ? "in orbital checkout" : "entire fleet unfolded ✓"}</div></div>
+  <div class="tile"><div class="k">Lost</div><div class="v" style="color:var(--critical)">${lost}</div><div class="s">BB7 · New Glenn stage-2 anomaly</div></div>
+  <div class="tile"><div class="k">Next booked launch</div><div class="v" style="font-size:19px;padding-top:6px">BB 11–13</div><div class="s">Falcon 9 · early Aug 2026</div></div>
+  <div class="tile"><div class="k">Progress to 45 sats</div><div class="v">${Math.round(opCount/TARGET*100)}%</div>
+    <div class="meter"><div style="width:${opCount/TARGET*100}%"></div></div><div class="s">${opCount} / ${TARGET} — commercial coverage gate</div></div>`;
+
+// clock + TLE age
+function tickClock() {
+  $("clock").textContent = NOW().toISOString().slice(0,19).replace("T"," ") + " UTC";
+}
+setInterval(tickClock, 1000); tickClock();
+
+const fetched = new Date(TLE_DATA.fetched);
+const ageDays = (NOW()-fetched)/86400e3;
+$("fetchedAt").textContent = TLE_DATA.fetched;
+const ageEl = $("tleAge");
+ageEl.textContent = `TLEs: ${ageDays<1 ? Math.round(ageDays*24)+"h" : ageDays.toFixed(1)+"d"} old`;
+if (ageDays > 7) { ageEl.classList.add("stale"); ageEl.textContent += " — run ./update-tles.sh"; }
+
+// theme
+const themeBtn = $("themeBtn");
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeBtn.textContent = t==="dark" ? "☀️ Light" : "🌙 Dark";
+  localStorage.setItem("asts-theme", t);
+}
+setTheme(localStorage.getItem("asts-theme") || "dark");
+themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme==="dark" ? "light" : "dark");
+
+/* ================= MAP ================= */
+
+const canvas = $("map"), ctx = canvas.getContext("2d");
+let selected = null, mapW = 0, mapH = 0, DPR = window.devicePixelRatio || 1;
+
+function sizeMap() {
+  mapW = canvas.parentElement.clientWidth;
+  mapH = mapW/2;
+  canvas.width = mapW*DPR; canvas.height = mapH*DPR;
+  canvas.style.height = mapH+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+const px = (lon,lat) => [ (lon+180)/360*mapW, (90-lat)/180*mapH ];
+
+function subsolar(d) {
+  const jd = d/86400e3 + 2440587.5, n = jd - 2451545;
+  const L = (280.460 + 0.9856474*n)%360, g = ((357.528 + 0.9856003*n)%360)*D2R;
+  const lam = (L + 1.915*Math.sin(g) + 0.020*Math.sin(2*g))*D2R;
+  const dec = Math.asin(Math.sin(23.439*D2R)*Math.sin(lam));
+  const ra = Math.atan2(Math.cos(23.439*D2R)*Math.sin(lam), Math.cos(lam));
+  const gmst = ((280.46061837 + 360.98564736629*n)%360)*D2R;
+  let lon = (ra - gmst)/D2R; lon = ((lon+540)%360)-180;
+  return { lat: dec/D2R, lon };
+}
+
+function drawMap() {
+  const now = NOW();
+  ctx.clearRect(0,0,mapW,mapH);
+  // ocean
+  ctx.fillStyle = css("--ocean"); ctx.fillRect(0,0,mapW,mapH);
+  // graticule
+  ctx.strokeStyle = css("--grid"); ctx.lineWidth = 0.5; ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  for (let lon=-150;lon<=150;lon+=30){ const [x]=px(lon,0); ctx.moveTo(x,0); ctx.lineTo(x,mapH); }
+  for (let lat=-60;lat<=60;lat+=30){ const [,y]=px(0,lat); ctx.moveTo(0,y); ctx.lineTo(mapW,y); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+  // land
+  ctx.fillStyle = css("--land"); ctx.strokeStyle = css("--land-line"); ctx.lineWidth = 0.7;
+  for (const ring of LAND) {
+    ctx.beginPath();
+    ring.forEach((p,i) => { const [x,y]=px(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // night side
+  const ss = subsolar(now);
+  ctx.fillStyle = document.documentElement.dataset.theme==="dark" ? "rgba(0,0,10,0.42)" : "rgba(20,20,60,0.18)";
+  ctx.beginPath();
+  const tanDec = Math.tan(ss.lat*D2R);
+  let first = true;
+  for (let sx=0; sx<=mapW; sx+=4) {
+    const lon = sx/mapW*360 - 180;
+    const phi = Math.atan(-Math.cos((lon-ss.lon)*D2R)/(Math.abs(tanDec)<1e-4?1e-4*Math.sign(tanDec||1):tanDec))/D2R;
+    const [x,y] = px(lon, phi);
+    first ? ctx.moveTo(x,y) : ctx.lineTo(x,y); first = false;
+  }
+  // close polygon toward the pole opposite the sun
+  const poleY = ss.lat >= 0 ? mapH : 0;
+  ctx.lineTo(mapW, poleY); ctx.lineTo(0, poleY); ctx.closePath(); ctx.fill();
+
+  // ground track for selected
+  if (selected) {
+    const s = sats.find(q => q.id===selected);
+    if (s) {
+      ctx.strokeStyle = css(s.block==="b1"?"--spacex":s.block==="b2"?"--blue-origin":"--ink-3");
+      ctx.globalAlpha = 0.55; ctx.lineWidth = 1.4; ctx.setLineDash([4,4]);
+      ctx.beginPath();
+      let prev = null;
+      for (let m=0;m<=100;m+=1) {
+        const p = propagate(s.tle, +now + m*60e3);
+        const [x,y] = px(p.lon,p.lat);
+        if (prev!==null && Math.abs(x-prev)>mapW/2) ctx.moveTo(x,y); else prev===null?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        prev = x;
+      }
+      ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+  }
+
+  // satellites
+  const positions = [];
+  for (const s of sats) {
+    const p = propagate(s.tle, +now);
+    const [x,y] = px(p.lon,p.lat);
+    positions.push({ s, p, x, y });
+    const color = css(s.block==="b1"?"--spacex":s.block==="b2"?"--blue-origin":"--ink-3");
+    const r = s.block==="proto" ? 4 : 5.5;
+    ctx.beginPath(); ctx.arc(x,y,r,0,7);
+    if (s.status==="unfolded") {
+      ctx.fillStyle = color; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = css("--surface-1"); ctx.stroke();
+    } else { // deployed / checkout — hollow with pulse
+      const pulse = 1 + 0.35*Math.sin(Date.now()/350);
+      ctx.lineWidth = 2.2; ctx.strokeStyle = color; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x,y,r*1.9*pulse,0,7);
+      ctx.lineWidth = 1; ctx.globalAlpha = 0.35; ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    if (s.id===selected) {
+      ctx.beginPath(); ctx.arc(x,y,r+5,0,7);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = css("--ink-1"); ctx.stroke();
+    }
+    ctx.fillStyle = css("--ink-2"); ctx.font = "10.5px system-ui";
+    ctx.fillText(s.id, x+8, y-6);
+  }
+  canvas._positions = positions;
+}
+
+canvas.addEventListener("click", ev => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = ev.clientX-rect.left, my = ev.clientY-rect.top;
+  let best = null, bd = 18;
+  for (const q of canvas._positions||[]) {
+    const d = Math.hypot(q.x-mx,q.y-my);
+    if (d<bd) { bd=d; best=q.s.id; }
+  }
+  selected = best===selected ? null : best;
+  renderPanel();
+});
+
+function renderPanel() {
+  const el = $("satPanel");
+  const s = sats.find(q => q.id===selected);
+  if (!s) {
+    el.innerHTML = `<h3>Fleet overview</h3>
+      <div>${opCount} operational satellites in ~520 km low Earth orbit, 53° inclination.</div>
+      <div style="margin-top:6px">${unfolded} unfolded · ${checkout} in checkout</div>
+      <div class="hint">Click a satellite on the map for live altitude, speed and its next-100-minute ground track.</div>`;
+    return;
+  }
+  const p = propagate(s.tle, Date.now());
+  const badge = s.status==="unfolded"
+    ? `<span class="badge unfolded">✅ Fully unfolded</span>`
+    : `<span class="badge checkout">🔄 Deployed — unfolding pending</span>`;
+  el.innerHTML = `<h3>${s.name} <span class="chip ${s.block==="b1"?"b1":s.block==="b2"?"b2":"bw"}">${s.block==="proto"?"PROTO":s.block.toUpperCase()}</span></h3>
+    <div>${badge}</div>
+    <div style="margin-top:6px" class="row">Lat / Lon: <span class="num">${p.lat.toFixed(2)}°, ${p.lon.toFixed(2)}°</span></div>
+    <div>Altitude: <span class="num">${p.alt.toFixed(0)} km</span></div>
+    <div>Speed: <span class="num">${p.vel.toFixed(2)} km/s</span></div>
+    <div>Array: <span class="num">${s.array.toLocaleString()} ft²</span></div>
+    <div>NORAD: <span class="num">${s.tle.norad}</span></div>
+    <div>Launched: <span class="num">${s.launched}</span> · ${s.vehicle}</div>
+    <div class="hint">${s.statusNote}${s.note ? " · "+s.note : ""}</div>`;
+}
+
+function loop() {
+  drawMap();
+  const s = sats.find(q => q.id===selected);
+  if (s) renderPanel();
+  requestAnimationFrame(() => setTimeout(loop, 500));
+}
+window.addEventListener("resize", () => { sizeMap(); drawMap(); });
+sizeMap(); renderPanel(); loop();
+
+/* ================= FLEET CARDS ================= */
+
+$("fleet").innerHTML = FLEET.map(s => {
+  const badge = { unfolded:`<span class="badge unfolded">✅ Fully unfolded</span>`,
+                  checkout:`<span class="badge checkout">🔄 Deployed — unfolding pending</span>`,
+                  lost:`<span class="badge lost">✕ Lost</span>` }[s.status];
+  const chip = s.block==="proto" ? `<span class="chip bw">PROTO</span>` : `<span class="chip ${s.block}">${s.block.toUpperCase()}</span>`;
+  return `<div class="sat-card">
+    <div class="top"><h3>${s.name}</h3>${chip}</div>
+    <div class="row"><span>Launched</span><span>${s.launched}</span></div>
+    <div class="row"><span>Vehicle</span><span>${s.vehicle}</span></div>
+    <div class="row"><span>Array</span><span>${s.array.toLocaleString()} ft²</span></div>
+    ${s.cat && TLE_DATA.tles[s.cat] ? `<div class="row"><span>NORAD</span><span>${parseTLE(...TLE_DATA.tles[s.cat]).norad}</span></div>` : ""}
+    <div class="st">${badge}</div>
+    <div class="note">${s.statusNote}${s.note ? "<br>"+s.note : ""}</div>
+  </div>`;
+}).join("");
+
+/* ================= ROADMAP CHART ================= */
+
+function buildChart() {
+  const svg = $("chart");
+  const W = svg.clientWidth || 1100, H = 330;
+  const M = { l: 34, r: 14, t: 34, b: 86 };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+
+  // one slot per launch, evenly spaced
+  const n = LAUNCHES.length;
+  const slotW = (W-M.l-M.r)/n;
+  const barW = Math.min(34, slotW*0.55);
+  const Xc = i => M.l + slotW*(i+0.5);
+  const maxV = 8;
+  const Y = v => H-M.b - v/maxV*(H-M.t-M.b);
+
+  const provColor = { spacex:"var(--spacex)", blue:"var(--blue-origin)", isro:"var(--isro)" };
+  const fmt = d => { const dt = new Date(d); return dt.toLocaleString("en-US",{month:"short"}) + " ’" + String(dt.getFullYear()).slice(2); };
+
+  let g = "";
+  // y grid: satellites carried per launch
+  for (let v=0; v<=maxV; v+=2) {
+    g += `<line x1="${M.l}" y1="${Y(v)}" x2="${W-M.r}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/>
+          <text x="${M.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">${v}</text>`;
+  }
+  g += `<text x="${M.l-24}" y="${M.t-14}" font-size="10.5" fill="var(--ink-3)">BB2 sats / launch</text>
+        <line x1="${M.l}" y1="${H-M.b}" x2="${W-M.r}" y2="${H-M.b}" stroke="var(--baseline)" stroke-width="1"/>`;
+
+  let cum = 0, dividerDrawn = false;
+  LAUNCHES.forEach((L, i) => {
+    cum += L.count;
+    const x = Xc(i), v = L.count || 1;   // failed launch: show the 1 sat it carried, struck out
+    const yTop = Y(L.type==="failed" ? 1 : L.count);
+    const c = provColor[L.provider];
+
+    // divider before first hypothetical launch
+    if (!dividerDrawn && L.type==="projected") {
+      const dx = x - slotW/2;
+      g += `<line x1="${dx}" y1="${M.t-4}" x2="${dx}" y2="${H-M.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 4"/>
+            <text x="${dx-6}" y="${M.t-8}" text-anchor="end" font-size="10.5" font-weight="600" fill="var(--ink-2)">flown / booked ⟵</text>
+            <text x="${dx+6}" y="${M.t-8}" font-size="10.5" font-weight="600" fill="var(--ink-3)">⟶ hypothetical</text>`;
+      dividerDrawn = true;
+    }
+
+    const barTall = (H-M.b-yTop) >= 18;
+    if (L.type==="failed") {
+      const midY = (yTop+H-M.b)/2;
+      g += `<g class="mk" data-i="${i}" style="cursor:pointer">
+              <rect x="${x-barW/2}" y="${yTop}" width="${barW}" height="${H-M.b-yTop}" rx="4"
+                fill="none" stroke="var(--critical)" stroke-width="1.6" stroke-dasharray="3 3"/>
+              <path d="M ${x-5} ${midY-5} L ${x+5} ${midY+5} M ${x-5} ${midY+5} L ${x+5} ${midY-5}" stroke="var(--critical)" stroke-width="2.4"/>
+              <rect x="${x-slotW/2}" y="${M.t}" width="${slotW}" height="${H-M.t-M.b}" fill="transparent"/></g>`;
+    } else {
+      const hollow = L.type==="projected";
+      g += `<g class="mk" data-i="${i}" style="cursor:pointer">
+              <rect x="${x-barW/2}" y="${yTop}" width="${barW}" height="${Math.max(2, H-M.b-yTop)}" rx="4"
+                fill="${hollow ? "color-mix(in srgb, "+c+" 22%, transparent)" : c}"
+                stroke="${c}" stroke-width="${hollow?1.6:0}" ${hollow?'stroke-dasharray="4 3"':''}/>
+              <rect x="${x-slotW/2}" y="${M.t}" width="${slotW}" height="${H-M.t-M.b}" fill="transparent"/></g>`;
+      // sats carried inside the bar; one running total above it
+      if (L.count) {
+        if (barTall) g += `<text x="${x}" y="${yTop+14}" text-anchor="middle" font-size="11" font-weight="700"
+              fill="${hollow ? "var(--ink-1)" : "var(--surface-1)"}" style="font-variant-numeric:tabular-nums">${L.count}</text>`;
+        g += `<text x="${x}" y="${yTop-7}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink-2)" style="font-variant-numeric:tabular-nums">Σ${cum}</text>`;
+      }
+    }
+    // x label: one rotated line — "Mon ’YY · BB n–m"
+    const tag = L.type==="failed" ? "BB 7 ✕"
+      : L.label.replace("BlueBirds ","BB ").replace("BlueBird ","BB ").replace("BlueWalker 3","BW3").split("·")[0].split("(")[0].trim();
+    g += `<text x="${x+3}" y="${H-M.b+14}" text-anchor="end" font-size="10.5"
+            fill="${L.type==="failed" ? "var(--critical)" : "var(--ink-3)"}"
+            transform="rotate(-38 ${x+3} ${H-M.b+14})">${fmt(L.date)} · ${tag}</text>`;
+    if (cum >= TARGET && L.count && L.type!=="failed" && !g.includes("goal-flag")) {
+      g += `<text id="goal-flag" x="${W-M.r}" y="${M.t-8}" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--good)">${W<700 ? "↓ 45 ✓" : "↓ 45 ✓ coverage begins"}</text>`;
+    }
+  });
+
+  svg.innerHTML = g;
+
+  // tooltips
+  const tip = $("tooltip");
+  const typeName = { complete:"Complete", failed:"Failure", booked:"Booked", projected:"Hypothetical" };
+  const cums = []; LAUNCHES.reduce((a,L) => { const s = a + L.count; cums.push(s); return s; }, 0);
+  svg.querySelectorAll(".mk").forEach(m => {
+    const i = +m.dataset.i, L = LAUNCHES[i], p = { v: cums[i] };
+    m.addEventListener("mousemove", ev => {
+      tip.style.display = "block";
+      tip.style.left = Math.min(ev.clientX+14, window.innerWidth-280)+"px";
+      tip.style.top  = (ev.clientY+14)+"px";
+      tip.innerHTML = `<b>${L.label}</b>${L.date} · ${PROVIDERS[L.provider].name} ${L.vehicle}<br>
+        ${typeName[L.type]}${L.count?` · +${L.count} sats → <b style="display:inline">${p.v} in orbit</b>`:""}<br>
+        <span style="color:var(--ink-3)">${L.note||""}</span>`;
+    });
+    m.addEventListener("mouseleave", () => tip.style.display = "none");
+  });
+}
+buildChart();
+window.addEventListener("resize", buildChart);
+
+/* ================= TIMELINE ================= */
+
+{
+  const provColor = { spacex:"var(--spacex)", blue:"var(--blue-origin)", isro:"var(--isro)" };
+  const typeName = { complete:"Complete", failed:"Failed", booked:"Booked", projected:"Projected" };
+  let cum = 0, html = "", divided = false;
+  for (const L of LAUNCHES) {
+    cum += L.count;
+    if (!divided && L.type==="projected") {
+      html += `<div class="divider-row">Hypothetical schedule below — not company guidance</div>`;
+      divided = true;
+    }
+    html += `<div class="launch ${L.type==="projected"?"projected":""}">
+      <div class="date">${L.date}</div>
+      <div class="what"><b>${L.label}</b> <span class="lb ${L.type}">${typeName[L.type]}</span><div class="n">${L.note||""}</div></div>
+      <div class="prov"><i style="background:${provColor[L.provider]}"></i>${PROVIDERS[L.provider].name} · ${L.vehicle}</div>
+      <div class="cum">${L.count ? `+${L.count} → <b>${cum}</b>` : `<b style="color:var(--critical)">+0</b>`}<br><span style="font-size:11px">in orbit</span></div>
+    </div>`;
+  }
+  $("timeline").innerHTML = html;
+}
+
+/* ================= PROVIDERS ================= */
+
+$("provs").innerHTML = Object.entries(PROVIDERS).map(([k,p]) => {
+  const flown = LAUNCHES.filter(l => l.provider===k && (l.type==="complete"||l.type==="failed")).length;
+  const booked = LAUNCHES.filter(l => l.provider===k && l.type==="booked").length;
+  return `<div class="prov-card" style="--pc:var(${p.cssVar})">
+    <h3>${p.name} <span class="pstat ${p.status}">${{active:"● Active", grounded:"■ Grounded — under repair", flown:"◐ Flown once — none booked"}[p.status]}</span></h3>
+    <div class="row"><span>Vehicle</span><span>${p.vehicle}</span></div>
+    <div class="row"><span>Capacity</span><span>${p.capacity}</span></div>
+    <div class="row"><span>AST missions flown</span><span>${flown}</span></div>
+    <div class="row"><span>Booked</span><span>${booked || "—"}</span></div>
+    <div class="note" style="margin-top:8px;font-size:12.5px;color:var(--ink-3)">${p.detail}</div>
+  </div>`;
+}).join("");
+</script>
+</body>
+</html>
