@@ -277,7 +277,7 @@ const LAUNCHES = [
   { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
   { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
   { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40) — in-orbit checkout under way" },
-  { date:"2026-10-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical — Falcon 9 cadence continues" },
+  { date:"2026-10-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Date hypothetical — AST confirms BB14–16 already in prep for the next mission (production advancing through satellite 42)" },
   { date:"2026-11-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
   { date:"2026-12-18", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
   { date:"2027-01-25", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
@@ -359,7 +359,7 @@ $("tiles").innerHTML = `
   <div class="tile"><div class="k">Fully unfolded</div><div class="v" style="color:var(--good)">${unfolded}</div><div class="s">arrays deployed &amp; operating</div></div>
   <div class="tile"><div class="k">Deployed · unfolding pending</div><div class="v" style="color:var(${checkout?"--warning":"--good"})">${checkout}</div><div class="s">${checkout ? "in orbital checkout" : "entire fleet unfolded ✓"}</div></div>
   <div class="tile"><div class="k">Lost</div><div class="v" style="color:var(--critical)">${lost}</div><div class="s">BB7 · New Glenn stage-2 anomaly</div></div>
-  <div class="tile"><div class="k">Next booked launch</div><div class="v" style="font-size:19px;padding-top:6px">TBA</div><div class="s">BB 11–13 flew Aug 5 ✓ · next booking pending</div></div>
+  <div class="tile"><div class="k">Next launch (in prep)</div><div class="v" style="font-size:19px;padding-top:6px">BB 14–16</div><div class="s">preparing for next mission · date TBA</div></div>
   <div class="tile"><div class="k">Progress to 45 sats</div><div class="v">${Math.round(opCount/TARGET*100)}%</div>
     <div class="meter"><div style="width:${opCount/TARGET*100}%"></div></div><div class="s">${opCount} / ${TARGET} — commercial coverage gate</div></div>`;
 
