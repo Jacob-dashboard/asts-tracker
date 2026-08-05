@@ -225,7 +225,7 @@
   <div class="provs" id="provs"></div>
 
   <footer>
-    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through July 20, 2026 — BlueBirds 8–10 arrays fully unfolded July 20, 2026; BlueBirds 11–13 booked on Falcon 9 for the first half of August 2026; commercial direct-to-device service deferred to early 2027.</p>
+    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through August 5, 2026 — BlueBirds 11–13 launched successfully on Falcon 9 from SLC-40 at 07:49 UTC on August 5, 2026 (arrays not yet unfolded); commercial direct-to-device service deferred to early 2027.</p>
     <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027, and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
   </footer>
 </div>
@@ -264,6 +264,9 @@ const FLEET = [
   { id:"BB8",  name:"BlueBird 8",  block:"b2", cat:"SPACEMOBILE-008", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 2026", array:2400 },
   { id:"BB9",  name:"BlueBird 9",  block:"b2", cat:"SPACEMOBILE-009", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Jul 20, 2026", array:2400 },
   { id:"BB10", name:"BlueBird 10", block:"b2", cat:"SPACEMOBILE-010", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 15, 2026", array:2400 },
+  { id:"BB11", name:"BlueBird 11", block:"b2", cat:"SPACEMOBILE-011", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
+  { id:"BB12", name:"BlueBird 12", block:"b2", cat:"SPACEMOBILE-012", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
+  { id:"BB13", name:"BlueBird 13", block:"b2", cat:"SPACEMOBILE-013", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
 ];
 
 // type: complete | failed | booked | projected     count = operational sats added
@@ -273,7 +276,7 @@ const LAUNCHES = [
   { date:"2025-12-23", label:"BlueBird 6 · first Block 2", provider:"isro", vehicle:"LVM3-M6",        count:1, type:"complete", note:"Unfolded Feb 10, 2026 — record 2,400 ft² array" },
   { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
   { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
-  { date:"2026-08-08", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"booked",   note:"Booked — targeting first half of August 2026" },
+  { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40) — in-orbit checkout under way" },
   { date:"2026-10-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical — Falcon 9 cadence continues" },
   { date:"2026-11-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
   { date:"2026-12-18", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
@@ -356,7 +359,7 @@ $("tiles").innerHTML = `
   <div class="tile"><div class="k">Fully unfolded</div><div class="v" style="color:var(--good)">${unfolded}</div><div class="s">arrays deployed &amp; operating</div></div>
   <div class="tile"><div class="k">Deployed · unfolding pending</div><div class="v" style="color:var(${checkout?"--warning":"--good"})">${checkout}</div><div class="s">${checkout ? "in orbital checkout" : "entire fleet unfolded ✓"}</div></div>
   <div class="tile"><div class="k">Lost</div><div class="v" style="color:var(--critical)">${lost}</div><div class="s">BB7 · New Glenn stage-2 anomaly</div></div>
-  <div class="tile"><div class="k">Next booked launch</div><div class="v" style="font-size:19px;padding-top:6px">BB 11–13</div><div class="s">Falcon 9 · early Aug 2026</div></div>
+  <div class="tile"><div class="k">Next booked launch</div><div class="v" style="font-size:19px;padding-top:6px">TBA</div><div class="s">BB 11–13 flew Aug 5 ✓ · next booking pending</div></div>
   <div class="tile"><div class="k">Progress to 45 sats</div><div class="v">${Math.round(opCount/TARGET*100)}%</div>
     <div class="meter"><div style="width:${opCount/TARGET*100}%"></div></div><div class="s">${opCount} / ${TARGET} — commercial coverage gate</div></div>`;
 
