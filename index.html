@@ -225,7 +225,7 @@
   <div class="provs" id="provs"></div>
 
   <footer>
-    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through August 5, 2026 — BlueBirds 11–13 launched successfully on Falcon 9 from SLC-40 at 07:49 UTC on August 5, 2026 (arrays not yet unfolded); commercial direct-to-device service deferred to early 2027.</p>
+    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through August 27, 2026 — BlueBirds 11–13 launched Aug 5, 2026 (Falcon 9, SLC-40); BlueBirds 12 &amp; 13 arrays unfolded (confirmed Aug 27), BlueBird 11 unfold confirmation pending; commercial direct-to-device service deferred to early 2027.</p>
     <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027, and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
   </footer>
 </div>
@@ -264,9 +264,9 @@ const FLEET = [
   { id:"BB8",  name:"BlueBird 8",  block:"b2", cat:"SPACEMOBILE-008", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 2026", array:2400 },
   { id:"BB9",  name:"BlueBird 9",  block:"b2", cat:"SPACEMOBILE-009", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Jul 20, 2026", array:2400 },
   { id:"BB10", name:"BlueBird 10", block:"b2", cat:"SPACEMOBILE-010", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 15, 2026", array:2400 },
-  { id:"BB11", name:"BlueBird 11", block:"b2", cat:"SPACEMOBILE-011", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
-  { id:"BB12", name:"BlueBird 12", block:"b2", cat:"SPACEMOBILE-012", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
-  { id:"BB13", name:"BlueBird 13", block:"b2", cat:"SPACEMOBILE-013", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Launched Aug 5, 2026 — orbital checkout", array:2400 },
+  { id:"BB11", name:"BlueBird 11", block:"b2", cat:"SPACEMOBILE-011", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Unfold pending — confirmation awaited", array:2400 },
+  { id:"BB12", name:"BlueBird 12", block:"b2", cat:"SPACEMOBILE-012", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Aug 27, 2026", array:2400 },
+  { id:"BB13", name:"BlueBird 13", block:"b2", cat:"SPACEMOBILE-013", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Aug 27, 2026", array:2400 },
 ];
 
 // type: complete | failed | booked | projected     count = operational sats added
@@ -293,7 +293,7 @@ const NOW = () => new Date();
 
 const MU = 398600.4418, RE = 6378.137, J2 = 1.08262668e-3, D2R = Math.PI/180;
 
-function parseTLE(l1, l2) {
+function parseTLE(l1, l2, noradOverride) {
   const yy = +l1.slice(18,20), doy = +l1.slice(20,32);
   const year = yy < 57 ? 2000+yy : 1900+yy;
   const epochMs = Date.UTC(year,0,1) + (doy-1)*86400e3;
@@ -309,7 +309,7 @@ function parseTLE(l1, l2) {
     m0:   +l2.slice(43,51)*D2R,
     n:    nRad,
     ndot: +l1.slice(33,43)*2*2*Math.PI/(86400*86400), // rev/day^2 /2 in TLE → rad/s^2
-    norad:+l1.slice(2,7),
+    norad: noradOverride ?? +l1.slice(2,7),
   };
 }
 
