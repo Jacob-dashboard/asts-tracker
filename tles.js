@@ -1,6 +1,6 @@
 // AST SpaceMobile TLE data — regenerate with ./update-tles.sh
 const TLE_DATA = {
- "fetched": "2026-08-27T14:48:59Z",
+ "fetched": "2026-08-27T17:29:27Z",
  "tles": {
   "SPACEMOBILE-003": [
    "1 61045U 24163A   26238.47330053 -.00000722  00000+0 -17783-4 0  9990",
