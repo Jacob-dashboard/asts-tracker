@@ -55,6 +55,8 @@ for rec in satcat:
     gp = fetch_json(f"https://celestrak.org/NORAD/elements/gp.php?CATNR={rec['NORAD_CAT_ID']}&FORMAT=json")
     if gp:
         sats[name] = synth(gp[0], rec['NORAD_CAT_ID'])
+        # keep the fitted drag term for configuration analysis (BSTAR ratio folded vs unfolded)
+        sats[name].append({'bstar': gp[0].get('BSTAR'), 'ndot': gp[0].get('MEAN_MOTION_DOT'), 'epoch': gp[0].get('EPOCH')})
 
 out = {'fetched': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'tles': sats}
 open('tles.js', 'w').write('// AST SpaceMobile TLE data — regenerate with ./update-tles.sh\nconst TLE_DATA = ' + json.dumps(out, indent=1) + ';\n')
