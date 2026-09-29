@@ -208,12 +208,12 @@
   <div class="fleet" id="fleet"></div>
 
   <h2>Launch Roadmap → 45 Satellites</h2>
-  <div class="sub">One bar per launch: color = provider, height = BB2 satellites carried, <b>Σ = running total in orbit</b>. ~45 satellites is where continuous commercial coverage can begin. Launches right of the divider are a <b>hypothetical</b> schedule (Falcon 9 cadence + New Glenn hopefully back online in 1H 2027) finishing by Q3 2027.</div>
+  <div class="sub">One bar per launch: color = provider, height = BB2 satellites carried, <b>Σ = running total in orbit</b>. ~45 satellites is where continuous commercial coverage can begin. Launches right of the divider are a <b>hypothetical</b> schedule (Falcon 9 cadence + New Glenn back online 1H 2027, ramping 4 → 6 → 8 sats per AST management) finishing in late Q3 2027.</div>
   <div class="chart-card">
     <div class="chart-scroll"><svg id="chart"></svg></div>
     <div class="chart-legend">
       <span><i class="dot" style="background:var(--spacex)"></i>SpaceX Falcon 9 <b style="color:var(--ink-3);font-weight:400">(3 × BB2 per launch)</b></span>
-      <span><i class="dot" style="background:var(--blue-origin)"></i>Blue Origin New Glenn <b style="color:var(--ink-3);font-weight:400">(up to 8 × BB2 · grounded, hoped back 1H ’27)</b></span>
+      <span><i class="dot" style="background:var(--blue-origin)"></i>Blue Origin New Glenn <b style="color:var(--ink-3);font-weight:400">(ramp: 4 → 6 → 8 × BB2 per AST · grounded, hoped back 1H ’27)</b></span>
       <span><i class="dot" style="background:var(--isro)"></i>ISRO LVM3 <b style="color:var(--ink-3);font-weight:400">(flew BB6 — no future launches assumed)</b></span>
       <span style="color:var(--critical)">✕ launch failure</span>
       <span style="color:var(--ink-3)">solid bar: flown/booked · outlined bar: hypothetical</span>
@@ -226,7 +226,7 @@
 
   <footer>
     <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as reported through August 27, 2026 — BlueBirds 11–13 launched Aug 5, 2026 (Falcon 9, SLC-40); BlueBirds 12 &amp; 13 arrays unfolded (confirmed Aug 27), BlueBird 11 unfold confirmation pending; commercial direct-to-device service deferred to early 2027.</p>
-    <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027, and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
+    <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027 with management's stated capacity ramp (4 BB2 on the first mission, 6 on the second, 8 thereafter), and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
   </footer>
 </div>
 
@@ -243,7 +243,7 @@ const PROVIDERS = {
   spacex: { name: "SpaceX", vehicle: "Falcon 9",  cssVar: "--spacex",      capacity: "3 × Block 2 BlueBirds", status: "active",
             detail: "Workhorse of the manifest. Flew Block 1 (5 sats, one launch) and now Block 2 in batches of three." },
   blue:   { name: "Blue Origin", vehicle: "New Glenn", cssVar: "--blue-origin", capacity: "Up to 8 × Block 2 BlueBirds", status: "grounded",
-            detail: "Contracted for the bulk of the 45-sat build-out. Grounded after a June 2026 upper-stage ground-test anomaly; BB7 was lost on NG-3 in April 2026 (stage-2 underperformance). Under repair — hopefully back online in 1H 2027; the roadmap assumes nothing sooner." },
+            detail: "Contracted for the bulk of the 45-sat build-out. Grounded since the May 28, 2026 pad explosion (BE-4 oxygen valve — vehicle lost, LC-36 damaged); BB7 was lost on NG-3 in April 2026. Targeting return to flight by end of 2026; AST management guides a capacity ramp — 4 BB2 on the first mission, 6 on the second, 8-packs only after that. The roadmap models the first AST mission in April 2027." },
   isro:   { name: "ISRO", vehicle: "LVM3 (GSLV Mk III)", cssVar: "--isro", capacity: "1 × Block 2 BlueBird", status: "flown",
             detail: "Launched BlueBird 6 — the first Block 2 — on LVM3-M6 in December 2025. No further AST missions announced, so the roadmap assumes none. AST is exploring ways to expand launch capacity beyond the current providers." },
 };
@@ -277,14 +277,15 @@ const LAUNCHES = [
   { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
   { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
   { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40) — in-orbit checkout under way" },
-  { date:"2026-10-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Date hypothetical — AST confirms BB14–16 already in prep for the next mission (production advancing through satellite 42)" },
-  { date:"2026-11-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2026-12-18", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-01-25", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-03-05", label:"BlueBirds 26–28",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-04-20", label:"BlueBirds 29–36",          provider:"blue",   vehicle:"New Glenn",      count:8, type:"projected", note:"Hypothetical — New Glenn return-to-flight (hoped 1H 2027), first 8-pack" },
-  { date:"2027-05-25", label:"BlueBirds 37–39",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-07-15", label:"BlueBirds 40–46",          provider:"blue",   vehicle:"New Glenn",      count:7, type:"projected", note:"Hypothetical — partial 8-slot manifest tops off the constellation: 45th operational satellite ✓ (Q3 2027)" },
+  { date:"2026-11-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Date hypothetical — BB14–16 in prep per AST, still unbooked as of late Sep 2026" },
+  { date:"2026-12-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-02-01", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-03-15", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-04-20", label:"BlueBirds 26–29",          provider:"blue",   vehicle:"New Glenn",      count:4, type:"projected", note:"Hypothetical — New Glenn return-to-flight; first AST mission carries 4 BB2 per management's ramp guidance" },
+  { date:"2027-05-25", label:"BlueBirds 30–32",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-06-20", label:"BlueBirds 33–38",          provider:"blue",   vehicle:"New Glenn",      count:6, type:"projected", note:"Hypothetical — second New Glenn carries 6 BB2 per management's ramp (8-packs only after the first two)" },
+  { date:"2027-07-30", label:"BlueBirds 39–41",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-09-10", label:"BlueBirds 42–46",          provider:"blue",   vehicle:"New Glenn",      count:5, type:"projected", note:"Hypothetical — partial manifest tops off the constellation: 45th operational satellite ✓ (late Q3 2027)" },
 ];
 const TARGET = 45;
 const NOW = () => new Date();
