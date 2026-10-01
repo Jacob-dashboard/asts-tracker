@@ -225,7 +225,7 @@
   <div class="provs" id="provs"></div>
 
   <footer>
-    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as of September 29, 2026 — BlueBirds 12 &amp; 13 unfolded (confirmed Aug 27); BlueBird 11 held folded ~7 weeks for along-track phasing, with orbital drag data indicating its array deployment began ~Sep 26 (company confirmation pending); BlueBirds 14–16 in prep, launch unbooked; commercial direct-to-device service deferred to early 2027.</p>
+    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as of September 30, 2026 — BlueBird 11 fully unfolded (confirmed Sep 30 after a deliberate 56-day phasing campaign; orbital drag data tracked the deployment Sep 26–30), completing the entire on-orbit fleet; BlueBirds 14–16 shipped per AST, launch date TBA; commercial direct-to-device service deferred to early 2027.</p>
     <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027 with management's stated capacity ramp (4 BB2 on the first mission, 6 on the second, 8 thereafter), and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
   </footer>
 </div>
@@ -264,7 +264,7 @@ const FLEET = [
   { id:"BB8",  name:"BlueBird 8",  block:"b2", cat:"SPACEMOBILE-008", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 2026", array:2400 },
   { id:"BB9",  name:"BlueBird 9",  block:"b2", cat:"SPACEMOBILE-009", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Jul 20, 2026", array:2400 },
   { id:"BB10", name:"BlueBird 10", block:"b2", cat:"SPACEMOBILE-010", launched:"2026-06-17", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded Jul 15, 2026", array:2400 },
-  { id:"BB11", name:"BlueBird 11", block:"b2", cat:"SPACEMOBILE-011", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"checkout", statusNote:"Unfolding — deployment in progress per orbital drag data (began ~Sep 26, 2026)", array:2400 },
+  { id:"BB11", name:"BlueBird 11", block:"b2", cat:"SPACEMOBILE-011", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Sep 30, 2026 after a 56-day along-track phasing campaign; drag data showed deployment Sep 26–30", array:2400 },
   { id:"BB12", name:"BlueBird 12", block:"b2", cat:"SPACEMOBILE-012", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Aug 27, 2026", array:2400 },
   { id:"BB13", name:"BlueBird 13", block:"b2", cat:"SPACEMOBILE-013", launched:"2026-08-05", provider:"spacex", vehicle:"Falcon 9", status:"unfolded", statusNote:"Unfolded — confirmed Aug 27, 2026", array:2400 },
 ];
@@ -276,7 +276,7 @@ const LAUNCHES = [
   { date:"2025-12-23", label:"BlueBird 6 · first Block 2", provider:"isro", vehicle:"LVM3-M6",        count:1, type:"complete", note:"Unfolded Feb 10, 2026 — record 2,400 ft² array" },
   { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
   { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
-  { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40). BB12/13 unfolded Aug 27; BB11 phased along-track ~7 weeks, unfold in progress since ~Sep 26 per drag data" },
+  { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40). BB12/13 unfolded Aug 27; BB11 unfolded Sep 30 after a 56-day along-track phasing campaign — all three operational" },
   { date:"2026-11-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Date hypothetical — BB14–16 in prep per AST, still unbooked as of late Sep 2026" },
   { date:"2026-12-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
   { date:"2027-02-01", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
