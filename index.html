@@ -360,7 +360,7 @@ $("tiles").innerHTML = `
   <div class="tile"><div class="k">Fully unfolded</div><div class="v" style="color:var(--good)">${unfolded}</div><div class="s">arrays deployed &amp; operating</div></div>
   <div class="tile"><div class="k">Deployed · unfolding pending</div><div class="v" style="color:var(${checkout?"--warning":"--good"})">${checkout}</div><div class="s">${checkout ? "in orbital checkout" : "entire fleet unfolded ✓"}</div></div>
   <div class="tile"><div class="k">Lost</div><div class="v" style="color:var(--critical)">${lost}</div><div class="s">BB7 · New Glenn stage-2 anomaly</div></div>
-  <div class="tile"><div class="k">Next launch (shipped)</div><div class="v" style="font-size:19px;padding-top:6px">BB 14–16</div><div class="s">shipped per AST, Sep 30 · launch date TBA</div></div>
+  <div class="tile"><div class="k">Next launch (at the Cape)</div><div class="v" style="font-size:19px;padding-top:6px">BB 14–16</div><div class="s">at Cape Canaveral per AST, Oct 9 · date TBA</div></div>
   <div class="tile"><div class="k">Progress to 45 sats</div><div class="v">${Math.round(opCount/TARGET*100)}%</div>
     <div class="meter"><div style="width:${opCount/TARGET*100}%"></div></div><div class="s">${opCount} / ${TARGET} — commercial coverage gate</div></div>`;
 
