@@ -225,7 +225,7 @@
   <div class="provs" id="provs"></div>
 
   <footer>
-    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as of September 30, 2026 — BlueBird 11 fully unfolded (confirmed Sep 30 after a deliberate 56-day phasing campaign; orbital drag data tracked the deployment Sep 26–30), completing the entire on-orbit fleet; BlueBirds 14–16 shipped per AST, launch date TBA; commercial direct-to-device service deferred to early 2027.</p>
+    <p><b>Data:</b> orbital elements from CelesTrak (fetched <span id="fetchedAt">—</span>). Refresh with <code>./update-tles.sh</code> then reload this page. Fleet status &amp; schedule as of October 27, 2026 — all 12 on-orbit BlueBirds unfolded (BB11 confirmed Sep 30 after a 56-day phasing campaign); BlueBirds 14–16 at Cape Canaveral since Oct 9 and booked on Falcon 9 (SLC-40), date TBA — SpaceX has a ~6-week gap in Florida Falcon 9 launches after Oct 20 while crews prepare the first KSC Starship launch, so the working estimate is mid-December; AST targets initial, intermittent U.S. coverage before year-end 2026.</p>
     <p style="margin-top:6px"><b>Note:</b> launches marked “Projected” are a hypothetical model (not company guidance) pacing the constellation to 45 satellites by Q3 2027. It leans on Falcon 9 cadence, hopes New Glenn is back online in 1H 2027 with management's stated capacity ramp (4 BB2 on the first mission, 6 on the second, 8 thereafter), and assumes no further ISRO missions (one flown, none booked). This dashboard is an independent tracking tool, not investment advice.</p>
   </footer>
 </div>
@@ -277,15 +277,15 @@ const LAUNCHES = [
   { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
   { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
   { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40). BB12/13 unfolded Aug 27; BB11 unfolded Sep 30 after a 56-day along-track phasing campaign — all three operational" },
-  { date:"2026-11-15", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Date hypothetical — BB14–16 in prep per AST, still unbooked as of late Sep 2026" },
-  { date:"2026-12-20", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-02-01", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-03-15", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2026-12-10", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"booked",    note:"Booked on Falcon 9 (SLC-40), satellites at the Cape since Oct 9. Date TBA — SpaceX has a ~6-week gap in Florida Falcon 9 launches after Oct 20 (crews preparing the first KSC Starship launch), so mid-December is the working estimate" },
+  { date:"2027-01-22", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-03-05", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-04-15", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
   { date:"2027-04-20", label:"BlueBirds 26–29",          provider:"blue",   vehicle:"New Glenn",      count:4, type:"projected", note:"Hypothetical — New Glenn return-to-flight; first AST mission carries 4 BB2 per management's ramp guidance" },
-  { date:"2027-05-25", label:"BlueBirds 30–32",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-06-20", label:"BlueBirds 33–38",          provider:"blue",   vehicle:"New Glenn",      count:6, type:"projected", note:"Hypothetical — second New Glenn carries 6 BB2 per management's ramp (8-packs only after the first two)" },
-  { date:"2027-07-30", label:"BlueBirds 39–41",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-09-10", label:"BlueBirds 42–46",          provider:"blue",   vehicle:"New Glenn",      count:5, type:"projected", note:"Hypothetical — partial manifest tops off the constellation: 45th operational satellite ✓ (late Q3 2027)" },
+  { date:"2027-06-20", label:"BlueBirds 30–35",          provider:"blue",   vehicle:"New Glenn",      count:6, type:"projected", note:"Hypothetical — second New Glenn carries 6 BB2 per management's ramp (8-packs only after the first two)" },
+  { date:"2027-06-25", label:"BlueBirds 36–38",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-08-28", label:"BlueBirds 39–41",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
+  { date:"2027-09-10", label:"BlueBirds 42–46",          provider:"blue",   vehicle:"New Glenn",      count:5, type:"projected", note:"Hypothetical — carries 5 of a possible 8 per management's ramp, leaving 3 satellites of slack; 45th operational satellite ✓ (late Q3 2027)" },
 ];
 const TARGET = 45;
 const NOW = () => new Date();
@@ -360,7 +360,7 @@ $("tiles").innerHTML = `
   <div class="tile"><div class="k">Fully unfolded</div><div class="v" style="color:var(--good)">${unfolded}</div><div class="s">arrays deployed &amp; operating</div></div>
   <div class="tile"><div class="k">Deployed · unfolding pending</div><div class="v" style="color:var(${checkout?"--warning":"--good"})">${checkout}</div><div class="s">${checkout ? "in orbital checkout" : "entire fleet unfolded ✓"}</div></div>
   <div class="tile"><div class="k">Lost</div><div class="v" style="color:var(--critical)">${lost}</div><div class="s">BB7 · New Glenn stage-2 anomaly</div></div>
-  <div class="tile"><div class="k">Next launch (booked)</div><div class="v" style="font-size:19px;padding-top:6px">BB 14–16</div><div class="s">at the Cape, on the F9 manifest · date TBA (~early Nov)</div></div>
+  <div class="tile"><div class="k">Next launch (booked)</div><div class="v" style="font-size:19px;padding-top:6px">BB 14–16</div><div class="s">at the Cape, on the F9 manifest · date TBA (~mid-Dec, Florida F9 gap)</div></div>
   <div class="tile"><div class="k">Progress to 45 sats</div><div class="v">${Math.round(opCount/TARGET*100)}%</div>
     <div class="meter"><div style="width:${opCount/TARGET*100}%"></div></div><div class="s">${opCount} / ${TARGET} — commercial coverage gate</div></div>`;
 
