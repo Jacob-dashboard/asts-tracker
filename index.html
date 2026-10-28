@@ -270,23 +270,24 @@ const FLEET = [
 ];
 
 // type: complete | failed | booked | projected     count = operational sats added
+// prototype launches appear in the launch list but not on the roadmap chart
 const LAUNCHES = [
-  { date:"2022-09-10", label:"BlueWalker 3 (prototype)", provider:"spacex", vehicle:"Falcon 9",       count:0, type:"complete", note:"Test sat — proves the unfolding-array design" },
-  { date:"2024-09-12", label:"BlueBirds 1–5 · Block 1",  provider:"spacex", vehicle:"Falcon 9",       count:5, type:"complete", note:"All five arrays unfolded fall 2024" },
-  { date:"2025-12-23", label:"BlueBird 6 · first Block 2", provider:"isro", vehicle:"LVM3-M6",        count:1, type:"complete", note:"Unfolded Feb 10, 2026 — record 2,400 ft² array" },
-  { date:"2026-04-19", label:"BlueBird 7",               provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",   note:"Stage-2 underperformance — satellite lost" },
-  { date:"2026-06-17", label:"BlueBirds 8–10",           provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"All three arrays fully unfolded July 20, 2026" },
-  { date:"2026-08-05", label:"BlueBirds 11–13",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete", note:"Launched Aug 5, 2026 (07:49 UTC, SLC-40). BB12/13 unfolded Aug 27; BB11 unfolded Sep 30 after a 56-day along-track phasing campaign — all three operational" },
-  { date:"2026-12-28", label:"BlueBirds 14–16",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"booked",    note:"Booked on Falcon 9 (SLC-40), satellites at the Cape since Oct 9. Date TBA — modeled as the only remaining 2026 launch, at end of December, after SpaceX's ~6-week gap in Florida Falcon 9 launches (crews preparing the first KSC Starship launch)" },
-  { date:"2027-02-10", label:"BlueBirds 17–19",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical — Falcon 9 every ~6 weeks" },
-  { date:"2027-03-25", label:"BlueBirds 20–22",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-05-08", label:"BlueBirds 23–25",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-05-15", label:"BlueBirds 26–29",          provider:"blue",   vehicle:"New Glenn",      count:4, type:"projected", note:"Hypothetical — New Glenn starts taking AST payloads in Q2 2027 (modeled mid-May); first mission carries 4 BB2 per management's ramp" },
-  { date:"2027-06-22", label:"BlueBirds 30–32",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-07-20", label:"BlueBirds 33–38",          provider:"blue",   vehicle:"New Glenn",      count:6, type:"projected", note:"Hypothetical — second New Glenn carries 6 BB2 per management's ramp (8-packs only after the first two)" },
-  { date:"2027-08-05", label:"BlueBirds 39–41",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-09-18", label:"BlueBirds 42–44",          provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"Hypothetical" },
-  { date:"2027-09-25", label:"BlueBirds 45–52",          provider:"blue",   vehicle:"New Glenn",      count:8, type:"projected", note:"Hypothetical — first full 8-pack; crosses the 45-satellite coverage gate ✓ (Sep 25, 2027 — last week of Q3) and reaches 51 operational" },
+  { date:"2022-09-10", label:"BlueWalker 3",     prototype:true, provider:"spacex", vehicle:"Falcon 9",       count:0, type:"complete",  note:"Prototype — proved the unfolding-array design. Not counted toward 45." },
+  { date:"2024-09-12", label:"BlueBirds 1–5",    provider:"spacex", vehicle:"Falcon 9",       count:5, type:"complete",  note:"Block 1 (693 ft² arrays). All five unfolded fall 2024." },
+  { date:"2025-12-23", label:"BlueBird 6",       provider:"isro",   vehicle:"LVM3-M6",        count:1, type:"complete",  note:"First Block 2 (2,400 ft² array). Unfolded Feb 10, 2026." },
+  { date:"2026-04-19", label:"BlueBird 7",       provider:"blue",   vehicle:"New Glenn NG-3", count:0, type:"failed",    note:"Lost — New Glenn second-stage underperformance." },
+  { date:"2026-06-17", label:"BlueBirds 8–10",   provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete",  note:"All three unfolded by Jul 20, 2026." },
+  { date:"2026-08-05", label:"BlueBirds 11–13",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"complete",  note:"BB12/13 unfolded Aug 27; BB11 unfolded Sep 30 after a 56-day phasing campaign." },
+  { date:"2026-12-28", label:"BlueBirds 14–16",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"booked",    note:"At the Cape since Oct 9, date TBA. Modeled end of Dec, after SpaceX's ~6-week Florida Falcon 9 gap." },
+  { date:"2027-02-10", label:"BlueBirds 17–19",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-03-25", label:"BlueBirds 20–22",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-05-08", label:"BlueBirds 23–25",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-05-15", label:"BlueBirds 26–29",  provider:"blue",   vehicle:"New Glenn",      count:4, type:"projected", note:"First AST New Glenn mission (Q2 2027). 4 sats per management's ramp." },
+  { date:"2027-06-22", label:"BlueBirds 30–32",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-07-20", label:"BlueBirds 33–38",  provider:"blue",   vehicle:"New Glenn",      count:6, type:"projected", note:"Second New Glenn. 6 sats per management's ramp." },
+  { date:"2027-08-05", label:"BlueBirds 39–41",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-09-18", label:"BlueBirds 42–44",  provider:"spacex", vehicle:"Falcon 9",       count:3, type:"projected", note:"~6 weeks after the previous Falcon 9." },
+  { date:"2027-09-25", label:"BlueBirds 45–52",  provider:"blue",   vehicle:"New Glenn",      count:8, type:"projected", note:"First full 8-pack. Crosses 45 (coverage gate) and reaches 51." },
 ];
 const TARGET = 45;
 const NOW = () => new Date();
@@ -569,7 +570,8 @@ function buildChart() {
   svg.setAttribute("height", H);
 
   // one slot per launch, evenly spaced
-  const n = LAUNCHES.length;
+  const CL = LAUNCHES.filter(L => !L.prototype);
+  const n = CL.length;
   const slotW = (W-M.l-M.r)/n;
   const barW = Math.min(34, slotW*0.55);
   const Xc = i => M.l + slotW*(i+0.5);
@@ -585,11 +587,11 @@ function buildChart() {
     g += `<line x1="${M.l}" y1="${Y(v)}" x2="${W-M.r}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/>
           <text x="${M.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">${v}</text>`;
   }
-  g += `<text x="${M.l-24}" y="${M.t-14}" font-size="10.5" fill="var(--ink-3)">BB2 sats / launch</text>
+  g += `<text x="${M.l-24}" y="${M.t-14}" font-size="10.5" fill="var(--ink-3)">Satellites per launch</text>
         <line x1="${M.l}" y1="${H-M.b}" x2="${W-M.r}" y2="${H-M.b}" stroke="var(--baseline)" stroke-width="1"/>`;
 
   let cum = 0, dividerDrawn = false;
-  LAUNCHES.forEach((L, i) => {
+  CL.forEach((L, i) => {
     cum += L.count;
     const x = Xc(i), v = L.count || 1;   // failed launch: show the 1 sat it carried, struck out
     const yTop = Y(L.type==="failed" ? 1 : L.count);
@@ -633,7 +635,7 @@ function buildChart() {
             fill="${L.type==="failed" ? "var(--critical)" : "var(--ink-3)"}"
             transform="rotate(-38 ${x+3} ${H-M.b+14})">${fmt(L.date)} · ${tag}</text>`;
     if (cum >= TARGET && L.count && L.type!=="failed" && !g.includes("goal-flag")) {
-      g += `<text id="goal-flag" x="${W-M.r}" y="16" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--good)">↓ 45 ✓ coverage begins</text>`;
+      g += `<text id="goal-flag" x="${Math.min(W-M.r, x+barW/2)}" y="16" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--good)">45 reached ✓ coverage gate ↓</text>`;
     }
   });
 
@@ -642,9 +644,9 @@ function buildChart() {
   // tooltips
   const tip = $("tooltip");
   const typeName = { complete:"Complete", failed:"Failure", booked:"Booked", projected:"Hypothetical" };
-  const cums = []; LAUNCHES.reduce((a,L) => { const s = a + L.count; cums.push(s); return s; }, 0);
+  const cums = []; CL.reduce((a,L) => { const s = a + L.count; cums.push(s); return s; }, 0);
   svg.querySelectorAll(".mk").forEach(m => {
-    const i = +m.dataset.i, L = LAUNCHES[i], p = { v: cums[i] };
+    const i = +m.dataset.i, L = CL[i], p = { v: cums[i] };
     m.addEventListener("mousemove", ev => {
       tip.style.display = "block";
       tip.style.left = Math.min(ev.clientX+14, window.innerWidth-280)+"px";
@@ -675,7 +677,9 @@ window.addEventListener("resize", buildChart);
       <div class="date">${L.date}</div>
       <div class="what"><b>${L.label}</b> <span class="lb ${L.type}">${typeName[L.type]}</span><div class="n">${L.note||""}</div></div>
       <div class="prov"><i style="background:${provColor[L.provider]}"></i>${PROVIDERS[L.provider].name} · ${L.vehicle}</div>
-      <div class="cum">${L.count ? `+${L.count} → <b>${cum}</b>` : `<b style="color:var(--critical)">+0</b>`}<br><span style="font-size:11px">in orbit</span></div>
+      <div class="cum">${L.prototype ? `<span style="font-size:11px">prototype</span>`
+        : L.type==="failed" ? `<b style="color:var(--critical)">lost</b>`
+        : `+${L.count} → <b>${cum}</b><br><span style="font-size:11px">in orbit</span>`}</div>
     </div>`;
   }
   $("timeline").innerHTML = html;
